@@ -18,7 +18,6 @@ struct ContentView: View {
                 endPoint: .bottomTrailing
             )
             .ignoresSafeArea()
-
             VStack(spacing: 20) {
                 Text("GRMS")
                     .font(.system(size: 40, weight: .bold, design: .rounded))

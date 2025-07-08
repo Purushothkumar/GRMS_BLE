@@ -25,13 +25,15 @@ class BluetoothManager: NSObject, ObservableObject, BluetoothServiceProtocol {
     }
 
     func readTemperature() {
-        guard let char = tempChar else { return }
-        peripheral?.readValue(for: char)
+        if let char = tempChar {
+            peripheral?.readValue(for: char)
+        }
     }
 
     func readLightStatus() {
-        guard let char = lightChar else { return }
-        peripheral?.readValue(for: char)
+        if let char = lightChar {
+            peripheral?.readValue(for: char)
+        }
     }
 
     func enableNotifications() {
@@ -44,22 +46,34 @@ class BluetoothManager: NSObject, ObservableObject, BluetoothServiceProtocol {
     }
 
     func sendTemperatureCommand(_ command: String) {
-        guard let char = tempChar, char.properties.contains(.write) || char.properties.contains(.writeWithoutResponse) else { return }
-        peripheral?.writeValue(Data(command.utf8), for: char, type: .withResponse)
+        guard let char = tempChar else { return }
+        let type: CBCharacteristicWriteType = char.properties.contains(.write) ? .withResponse : .withoutResponse
+        peripheral?.writeValue(Data(command.utf8), for: char, type: type)
     }
 
     func sendLightCommand(_ command: String) {
-        guard let char = lightChar, char.properties.contains(.write) || char.properties.contains(.writeWithoutResponse) else { return }
-        peripheral?.writeValue(Data(command.utf8), for: char, type: .withResponse)
+        guard let char = lightChar else { return }
+        let type: CBCharacteristicWriteType = char.properties.contains(.write) ? .withResponse : .withoutResponse
+        peripheral?.writeValue(Data(command.utf8), for: char, type: type)
     }
 }
 
+// MARK: - CBCentralManagerDelegate & CBPeripheralDelegate
 extension BluetoothManager: CBCentralManagerDelegate, CBPeripheralDelegate {
     func centralManagerDidUpdateState(_ central: CBCentralManager) {
         DispatchQueue.main.async {
-            if central.state == .poweredOn {
+            switch central.state {
+            case .poweredOn:
                 self.connect()
-            } else {
+            case .unauthorized:
+                self.isConnected = false
+            case .poweredOff:
+                self.isConnected = false
+            case .unsupported:
+                self.isConnected = false
+            case .resetting, .unknown:
+                self.isConnected = false
+            @unknown default:
                 self.isConnected = false
             }
         }
@@ -67,10 +81,12 @@ extension BluetoothManager: CBCentralManagerDelegate, CBPeripheralDelegate {
 
     func centralManager(_ central: CBCentralManager, didDiscover peripheral: CBPeripheral,
                         advertisementData: [String: Any], rssi RSSI: NSNumber) {
-        self.peripheral = peripheral
-        centralManager.stopScan()
-        peripheral.delegate = self
-        centralManager.connect(peripheral)
+        if let name = peripheral.name, name.contains("GRMS") {
+            self.peripheral = peripheral
+            centralManager.stopScan()
+            peripheral.delegate = self
+            centralManager.connect(peripheral)
+        }
     }
 
     func centralManager(_ central: CBCentralManager, didConnect peripheral: CBPeripheral) {
@@ -80,12 +96,24 @@ extension BluetoothManager: CBCentralManagerDelegate, CBPeripheralDelegate {
         peripheral.discoverServices([ArduinoBLEUUID.service])
     }
 
+    func centralManager(_ central: CBCentralManager, didFailToConnect peripheral: CBPeripheral, error: Error?) {
+        DispatchQueue.main.async {
+            self.isConnected = false
+        }
+        self.peripheral = nil
+        DispatchQueue.main.asyncAfter(deadline: .now() + 1) {
+            self.connect()
+        }
+    }
+
     func centralManager(_ central: CBCentralManager, didDisconnectPeripheral peripheral: CBPeripheral, error: Error?) {
         DispatchQueue.main.async {
             self.isConnected = false
         }
         self.peripheral = nil
-        self.connect()
+        DispatchQueue.main.asyncAfter(deadline: .now() + 1) {
+            self.connect()
+        }
     }
 
     func peripheral(_ peripheral: CBPeripheral, didDiscoverServices error: Error?) {
@@ -97,10 +125,13 @@ extension BluetoothManager: CBCentralManagerDelegate, CBPeripheralDelegate {
 
     func peripheral(_ peripheral: CBPeripheral, didDiscoverCharacteristicsFor service: CBService, error: Error?) {
         for char in service.characteristics ?? [] {
-            if char.uuid == ArduinoBLEUUID.tempChar {
+            switch char.uuid {
+            case ArduinoBLEUUID.tempChar:
                 tempChar = char
-            } else if char.uuid == ArduinoBLEUUID.lightChar {
+            case ArduinoBLEUUID.lightChar:
                 lightChar = char
+            default:
+                break
             }
         }
         enableNotifications()
@@ -108,13 +139,16 @@ extension BluetoothManager: CBCentralManagerDelegate, CBPeripheralDelegate {
 
     func peripheral(_ peripheral: CBPeripheral, didUpdateValueFor characteristic: CBCharacteristic, error: Error?) {
         guard error == nil, let data = characteristic.value else { return }
-
         let value = String(data: data, encoding: .utf8) ?? "--"
+
         DispatchQueue.main.async {
-            if characteristic.uuid == ArduinoBLEUUID.tempChar {
+            switch characteristic.uuid {
+            case ArduinoBLEUUID.tempChar:
                 self.temperature = value
-            } else if characteristic.uuid == ArduinoBLEUUID.lightChar {
+            case ArduinoBLEUUID.lightChar:
                 self.lightStatus = value
+            default:
+                break
             }
         }
     }
