@@ -22,17 +22,17 @@ class ThermostatLightViewModel: ObservableObject {
         if let manager = bluetooth as? BluetoothManager {
             manager.$isConnected
                 .receive(on: RunLoop.main)
-                .assign(to: \ThermostatLightViewModel.isConnected, on: self)
+                .assign(to: \.isConnected, on: self)
                 .store(in: &cancellables)
 
             manager.$temperature
                 .receive(on: RunLoop.main)
-                .assign(to: \ThermostatLightViewModel.temperature, on: self)
+                .assign(to: \.temperature, on: self)
                 .store(in: &cancellables)
 
             manager.$lightStatus
                 .receive(on: RunLoop.main)
-                .assign(to: \ThermostatLightViewModel.lightStatus, on: self)
+                .assign(to: \.lightStatus, on: self)
                 .store(in: &cancellables)
         }
 

@@ -45,11 +45,21 @@
 			);
 			target = C59EA8492E1CF98B008952E4 /* GRMSTests */;
 		};
+		C59EA8A92E1D0C75008952E4 /* Exceptions for "GRMS" folder in "GRMS" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				Info.plist,
+			);
+			target = C59EA8392E1CF989008952E4 /* GRMS */;
+		};
 /* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
 		C59EA83C2E1CF989008952E4 /* GRMS */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
+			exceptions = (
+				C59EA8A92E1D0C75008952E4 /* Exceptions for "GRMS" folder in "GRMS" target */,
+			);
 			path = GRMS;
 			sourceTree = "<group>";
 		};
@@ -480,8 +490,11 @@
 				DEVELOPMENT_ASSET_PATHS = "\"GRMS/Preview Content\"";
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = GRMS/Info.plist;
+				INFOPLIST_KEY_LSApplicationCategoryType = "";
+				INFOPLIST_KEY_NSBluetoothAlwaysUsageDescription = "This app uses Bluetooth to connect to nearby IoT devices like thermostat and light controls";
+				INFOPLIST_KEY_NSBluetoothPeripheralUsageDescription = "This app requires Bluetooth access";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
-				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations = UIInterfaceOrientationPortrait;
 				IPHONEOS_DEPLOYMENT_TARGET = 15.6;
@@ -508,8 +521,11 @@
 				DEVELOPMENT_ASSET_PATHS = "\"GRMS/Preview Content\"";
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = GRMS/Info.plist;
+				INFOPLIST_KEY_LSApplicationCategoryType = "";
+				INFOPLIST_KEY_NSBluetoothAlwaysUsageDescription = "This app uses Bluetooth to connect to nearby IoT devices like thermostat and light controls";
+				INFOPLIST_KEY_NSBluetoothPeripheralUsageDescription = "This app requires Bluetooth access";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
-				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations = UIInterfaceOrientationPortrait;
 				IPHONEOS_DEPLOYMENT_TARGET = 15.6;
